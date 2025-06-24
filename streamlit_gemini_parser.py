@@ -302,11 +302,22 @@ class StreamlitGeminiParser:
         if self.is_initialized and self.model_type == model_choice:
             return True
         
+        # Reset previous state
+        self.ner_pipeline = None
+        self.nlp = None
+        self.spacy_model_available = False
         success = False
         
         try:
-            # Try transformer models first
-            if model_choice in ["bert-base", "bert-large", "distilbert"] and TRANSFORMERS_AVAILABLE:
+            # Handle enhanced-patterns choice directly
+            if model_choice == "enhanced-patterns":
+                self.model_type = "enhanced-patterns"
+                self.is_initialized = True
+                st.success("✅ Enhanced pattern matching ready!")
+                return True
+            
+            # Try transformer models
+            elif model_choice in ["bert-base", "bert-large", "distilbert"] and TRANSFORMERS_AVAILABLE:
                 models = {
                     "bert-base": "dslim/bert-base-NER",
                     "bert-large": "dbmdz/bert-large-cased-finetuned-conll03-english",
@@ -325,41 +336,45 @@ class StreamlitGeminiParser:
                     self.is_initialized = True
                     success = True
                     st.success(f"✅ {model_choice} loaded successfully!")
+                    return True
                 except Exception as e:
                     st.warning(f"⚠️ {model_choice} failed: {str(e)[:100]}... Trying fallback.")
             
-            # Try spaCy if transformer failed or was selected
-            if not success and model_choice == "spacy-only" and SPACY_AVAILABLE:
-                if download_spacy_model():
-                    try:
-                        import spacy
-                        self.nlp = spacy.load("en_core_web_sm")
-                        self.model_type = "spacy-only"
-                        self.is_initialized = True
-                        self.spacy_model_available = True
-                        success = True
-                        st.success("✅ spaCy model loaded successfully!")
-                    except Exception as e:
-                        st.warning(f"⚠️ spaCy loading failed: {str(e)[:100]}...")
+            # Try spaCy
+            elif model_choice == "spacy-only" and SPACY_AVAILABLE:
+                try:
+                    with st.spinner("Loading spaCy model..."):
+                        if download_spacy_model():
+                            import spacy
+                            self.nlp = spacy.load("en_core_web_sm")
+                            self.model_type = "spacy-only"
+                            self.is_initialized = True
+                            self.spacy_model_available = True
+                            success = True
+                            st.success("✅ spaCy model loaded successfully!")
+                            return True
+                        else:
+                            raise Exception("spaCy model download failed")
+                except Exception as e:
+                    st.warning(f"⚠️ spaCy loading failed: {str(e)[:100]}... Using fallback.")
             
-            # Always fall back to enhanced pattern matching
-            if not success:
-                self.model_type = "enhanced-patterns"
-                self.is_initialized = True
-                success = True
-                if model_choice != "enhanced-patterns":
-                    st.info("ℹ️ Using enhanced pattern matching as fallback.")
-                else:
-                    st.success("✅ Enhanced pattern matching ready!")
-            
-            return success
-            
-        except Exception as e:
-            st.error(f"Initialization error: {str(e)[:100]}...")
-            # Final fallback
+            # If we get here, the requested model failed or isn't available
+            # Fall back to enhanced pattern matching
             self.model_type = "enhanced-patterns"
             self.is_initialized = True
-            st.info("ℹ️ Using basic pattern matching as final fallback.")
+            
+            if model_choice != "enhanced-patterns":
+                st.info("ℹ️ Requested model not available. Using enhanced pattern matching as fallback.")
+            
+            st.success("✅ Enhanced pattern matching ready!")
+            return True
+            
+        except Exception as e:
+            # Final emergency fallback
+            st.warning(f"Initialization error: {str(e)[:100]}...")
+            self.model_type = "enhanced-patterns"
+            self.is_initialized = True
+            st.info("ℹ️ Using enhanced pattern matching as emergency fallback.")
             return True
     
     def extract_entities(self, text):
@@ -600,7 +615,7 @@ def main():
         st.header("⚙️ Configuration")
         
         # Model selection with better descriptions
-        available_models = [("Enhanced Pattern Matching (Always Available)", "enhanced-patterns")]
+        available_models = [("Enhanced Pattern Matching (Recommended)", "enhanced-patterns")]
         
         if TRANSFORMERS_AVAILABLE:
             available_models.extend([
@@ -616,7 +631,8 @@ def main():
             "🤖 Select NER Model",
             options=available_models,
             format_func=lambda x: x[0],
-            help="Enhanced pattern matching is always available as a reliable fallback"
+            index=0,  # Default to enhanced-patterns
+            help="Enhanced pattern matching is always available and works reliably"
         )[1]
         
         # Model descriptions
