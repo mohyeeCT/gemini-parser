@@ -416,17 +416,23 @@ class GeminiDataExtractor:
     def _extract_original_query(self, raw_data: str) -> str:
         """Extract the original search query with multiple patterns"""
         patterns = [
-            r'\[\["([^"]+)"\],3,null,0',     # Main query pattern
-            r'\[\["([^"]+)"\]',              # Alternative pattern
-            r'"([^"]*latest news[^"]*)"',    # News-specific pattern
-            r'null,\[\["([^"]+)"\],3',       # Another common pattern
-            r'\["([^"]+)",3,null,0',         # Variation without brackets
+            r'\[\[\\?"([^"]+)\\?"\],3,null,0',     # Main query pattern with optional escaped quotes
+            r'\[\[\\?"([^"]+)\\?"\]',              # Alternative pattern with optional escaped quotes
+            r'"([^"]*latest news[^"]*)"',          # News-specific pattern
+            r'null,\[\[\\?"([^"]+)\\?"\],3',       # Another common pattern with escaped quotes
+            r'\[\\?"([^"]+)\\?",3,null,0',         # Variation without brackets with escaped quotes
+            r'\[\["([^"]+)"\],3,null,0',           # Original pattern without escaped quotes
+            r'\[\["([^"]+)"\]',                    # Original alternative pattern
+            r'null,\[\["([^"]+)"\],3',             # Original common pattern
+            r'\["([^"]+)",3,null,0',               # Original variation without brackets
         ]
         
         for pattern in patterns:
             match = re.search(pattern, raw_data, re.IGNORECASE)
             if match:
                 query = match.group(1).strip()
+                # Clean up any remaining escaped quotes
+                query = query.replace('\\"', '"').replace('\\\\', '\\')
                 if len(query) > 2:  # Valid query
                     return query
         
@@ -438,13 +444,17 @@ class GeminiDataExtractor:
         
         # Multiple patterns for different query formats in Gemini
         patterns = [
-            r'\[\["([^"]+)",1\]',                    # Format: [["query",1]]
-            r'\[\["([^"]+)",2\]',                    # Format: [["query",2]]
-            r'\[\["([^"]+)",4\]',                    # Format: [["query",4]]
+            r'\[\\?"([^"]+)\\?",1\]',                    # Format: [["query",1]] or [\"query\",1]
+            r'\[\\?"([^"]+)\\?",2\]',                    # Format: [["query",2]] or [\"query\",2]
+            r'\[\\?"([^"]+)\\?",4\]',                    # Format: [["query",4]] or [\"query\",4]
+            r'\[\["([^"]+)",1\]',                        # Original format: [["query",1]]
+            r'\[\["([^"]+)",2\]',                        # Original format: [["query",2]]
+            r'\[\["([^"]+)",4\]',                        # Original format: [["query",4]]
             r'"([^"]*(?:what|how|when|where|why|who)[^"]*)"',  # Question patterns
             r'"([^"]*(?:latest|breaking|news|today)[^"]*)"',   # News patterns
-            r'"([^"]*\?[^"]*)"',                     # Any question with ?
-            r'\["([^"]+)",[1-9]\]',                  # General pattern with numbers
+            r'"([^"]*\?[^"]*)"',                         # Any question with ?
+            r'\[\\?"([^"]+)\\?",[1-9]\]',                # General pattern with numbers (escaped quotes)
+            r'\["([^"]+)",[1-9]\]',                      # General pattern with numbers (regular quotes)
         ]
         
         all_matches = set()  # Use set to avoid duplicates
@@ -453,6 +463,9 @@ class GeminiDataExtractor:
             matches = re.findall(pattern, raw_data, re.IGNORECASE)
             for match in matches:
                 cleaned_match = match.strip()
+                # Clean up escaped quotes
+                cleaned_match = cleaned_match.replace('\\"', '"').replace('\\\\', '\\')
+                
                 # Filter valid queries
                 if (len(cleaned_match) > 5 and 
                     not cleaned_match.startswith('http') and
