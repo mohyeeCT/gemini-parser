@@ -36,65 +36,250 @@ st.set_page_config(
     layout="wide"
 )
 
+# Enhanced CSS with proper dark theme support
 st.markdown("""
 <style>
+    /* Force dark theme */
+    .stApp {
+        background-color: #0e1117 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Main containers */
+    .main .block-container {
+        background-color: #0e1117 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Header styling */
     .main-header {
         font-size: 2.5rem;
-        color: #1E88E5;
+        color: #00d4ff !important;
         text-align: center;
         margin-bottom: 1rem;
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
     }
+    
+    /* Section containers with better contrast */
     .extraction-section {
-        background: #f8f9fa;
+        background: #1a1a1a !important;
         padding: 1rem;
         border-radius: 0.5rem;
         margin: 1rem 0;
-        border-left: 4px solid #28a745;
-        color: #212529;
+        border-left: 4px solid #00ff88;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
+    
+    /* Entity items with high contrast */
     .entity-item {
-        background: #e3f2fd;
-        padding: 0.5rem;
-        margin: 0.2rem 0;
-        border-radius: 0.3rem;
-        border-left: 3px solid #1976d2;
-        color: #0d47a1;
-    }
-    .nlp-entity {
-        background: #e8f5e8;
-        padding: 0.5rem;
-        margin: 0.2rem 0;
-        border-radius: 0.3rem;
-        border-left: 3px solid #4caf50;
-        color: #1b5e20;
-    }
-    .query-item {
-        background: #fff3e0;
-        padding: 0.5rem;
-        margin: 0.3rem 0;
-        border-radius: 0.3rem;
-        border-left: 3px solid #ff9800;
-        color: #e65100;
-    }
-    .snippet-preview {
-        background: #f5f5f5;
+        background: #2d2d2d !important;
         padding: 0.8rem;
-        border-radius: 0.3rem;
-        border: 1px solid #ddd;
-        color: #333;
+        margin: 0.4rem 0;
+        border-radius: 0.5rem;
+        border-left: 4px solid #00d4ff;
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* NLP entities with distinct styling */
+    .nlp-entity {
+        background: #1a3d1a !important;
+        padding: 0.8rem;
+        margin: 0.4rem 0;
+        border-radius: 0.5rem;
+        border-left: 4px solid #00ff88;
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(0, 255, 136, 0.1);
+    }
+    
+    /* Query items */
+    .query-item {
+        background: #3d2a1a !important;
+        padding: 0.8rem;
+        margin: 0.4rem 0;
+        border-radius: 0.5rem;
+        border-left: 4px solid #ffaa00;
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(255, 170, 0, 0.1);
+    }
+    
+    /* Code/snippet preview */
+    .snippet-preview {
+        background: #1a1a1a !important;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 2px solid #333333;
+        color: #ffffff !important;
         font-family: 'Courier New', monospace;
         white-space: pre-wrap;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     }
-    /* Fix Streamlit's default styling */
-    .stMarkdown {
-        color: inherit;
+    
+    /* Link styling */
+    .link-item {
+        background: #2d1a3d !important;
+        padding: 0.8rem;
+        margin: 0.4rem 0;
+        border-radius: 0.5rem;
+        border-left: 4px solid #dd55ff;
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(221, 85, 255, 0.1);
     }
+    
+    /* Override Streamlit's default text colors */
+    .stMarkdown, .stMarkdown p, .stMarkdown div {
+        color: #ffffff !important;
+    }
+    
+    /* Fix expanders */
     .stExpander {
-        background-color: white;
+        background-color: #1a1a1a !important;
+        border: 1px solid #333333 !important;
     }
+    
+    .stExpander > div {
+        background-color: #1a1a1a !important;
+    }
+    
     .stExpander > div > div {
-        color: #333;
+        color: #ffffff !important;
     }
+    
+    /* Fix tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #1a1a1a !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background-color: #2d2d2d !important;
+        color: #ffffff !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #3d3d3d !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: #00d4ff !important;
+        color: #000000 !important;
+    }
+    
+    /* Fix columns */
+    .stColumn > div {
+        background-color: transparent !important;
+        color: #ffffff !important;
+    }
+    
+    /* Fix metrics */
+    .metric-container {
+        background-color: #2d2d2d !important;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #333333;
+    }
+    
+    /* Fix info boxes */
+    .stInfo {
+        background-color: #1a3d3d !important;
+        color: #ffffff !important;
+        border-left-color: #00d4ff !important;
+    }
+    
+    .stSuccess {
+        background-color: #1a3d1a !important;
+        color: #ffffff !important;
+        border-left-color: #00ff88 !important;
+    }
+    
+    .stWarning {
+        background-color: #3d3d1a !important;
+        color: #ffffff !important;
+        border-left-color: #ffaa00 !important;
+    }
+    
+    .stError {
+        background-color: #3d1a1a !important;
+        color: #ffffff !important;
+        border-left-color: #ff4444 !important;
+    }
+    
+    /* Fix buttons */
+    .stButton > button {
+        background-color: #00d4ff !important;
+        color: #000000 !important;
+        border: none !important;
+        font-weight: bold !important;
+    }
+    
+    .stButton > button:hover {
+        background-color: #00b8e6 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 212, 255, 0.3);
+    }
+    
+    /* Fix download buttons */
+    .stDownloadButton > button {
+        background-color: #00ff88 !important;
+        color: #000000 !important;
+        border: none !important;
+        font-weight: bold !important;
+    }
+    
+    .stDownloadButton > button:hover {
+        background-color: #00dd77 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 255, 136, 0.3);
+    }
+    
+    /* Fix text input */
+    .stTextArea textarea {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        border: 2px solid #333333 !important;
+    }
+    
+    .stTextArea textarea:focus {
+        border-color: #00d4ff !important;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    }
+    
+    /* Fix checkbox */
+    .stCheckbox {
+        color: #ffffff !important;
+    }
+    
+    /* Fix sidebar */
+    .stSidebar {
+        background-color: #0a0a0a !important;
+    }
+    
+    .stSidebar .stMarkdown {
+        color: #ffffff !important;
+    }
+    
+    /* Custom utility classes */
+    .highlight-text {
+        background: linear-gradient(45deg, #00d4ff, #00ff88);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: bold;
+    }
+    
+    .entity-badge {
+        display: inline-block;
+        background: #00d4ff;
+        color: #000000;
+        padding: 0.2rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin: 0.1rem;
+    }
+    
+    .confidence-high { color: #00ff88 !important; }
+    .confidence-medium { color: #ffaa00 !important; }
+    .confidence-low { color: #ff6666 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -540,6 +725,74 @@ class GeminiDataExtractor:
         return "Unknown Source"
 
 # ============================================================================
+# UTILITY FUNCTIONS FOR BETTER DISPLAY
+# ============================================================================
+
+def display_entity_with_styling(entity):
+    """Display entity with proper styling based on confidence"""
+    confidence = entity['confidence']
+    if confidence > 0.9:
+        conf_class = "confidence-high"
+        conf_emoji = "🟢"
+    elif confidence > 0.7:
+        conf_class = "confidence-medium"  
+        conf_emoji = "🟡"
+    else:
+        conf_class = "confidence-low"
+        conf_emoji = "🟠"
+    
+    # Create styled display
+    st.markdown(f"""
+    <div class="entity-item">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong style="color: #00d4ff;">{entity['text']}</strong>
+                <span class="entity-badge">{entity['type']}</span>
+            </div>
+            <div style="text-align: right;">
+                <span class="{conf_class}">{conf_emoji} {confidence:.3f}</span><br>
+                <small style="color: #888;">via {entity['source']}</small>
+            </div>
+        </div>
+        {f'<div style="margin-top: 0.5rem; font-style: italic; color: #ccc;">💬 {entity["context"][:80]}...</div>' if entity.get('context') else ''}
+    </div>
+    """, unsafe_allow_html=True)
+
+def display_link_with_styling(link, index):
+    """Display link with proper styling"""
+    st.markdown(f"""
+    <div class="link-item">
+        <div style="margin-bottom: 0.5rem;">
+            <strong style="color: #dd55ff;">🔗 Link {index}</strong>
+            <span class="entity-badge" style="background: #dd55ff;">{link['source']}</span>
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+            <strong>Title:</strong> {link['title'][:100]}{'...' if len(link['title']) > 100 else ''}
+        </div>
+        <div>
+            <a href="{link['url']}" target="_blank" style="color: #00d4ff; text-decoration: none;">
+                🌐 Open Link
+            </a>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def display_query_with_styling(query, index, query_type="🔍"):
+    """Display query with proper styling"""
+    st.markdown(f"""
+    <div class="query-item">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong style="color: #ffaa00;">{index}. {query}</strong>
+            </div>
+            <div>
+                <span style="font-size: 1.2rem;">{query_type}</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ============================================================================
 # STREAMLIT APP
 # ============================================================================
 
@@ -547,14 +800,39 @@ def main():
     st.markdown('<h1 class="main-header">🔍 Gemini Data Extractor</h1>', unsafe_allow_html=True)
     st.markdown("**Extract queries, entities, text snippets, and links from Gemini network responses**")
     
-    # Show NLP status
+    # Show NLP status with better styling
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.info(f"🧠 **BERT**: {'✅' if TRANSFORMERS_AVAILABLE else '❌'}")
+        status = "✅ Available" if TRANSFORMERS_AVAILABLE else "❌ Not Available"
+        st.markdown(f"""
+        <div class="metric-container">
+            <div style="text-align: center;">
+                <div style="font-size: 1.2rem;">🧠 <strong>BERT</strong></div>
+                <div style="color: {'#00ff88' if TRANSFORMERS_AVAILABLE else '#ff6666'};">{status}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col2:
-        st.info(f"🔤 **spaCy**: {'✅' if SPACY_AVAILABLE else '❌'}")
+        status = "✅ Available" if SPACY_AVAILABLE else "❌ Not Available"
+        st.markdown(f"""
+        <div class="metric-container">
+            <div style="text-align: center;">
+                <div style="font-size: 1.2rem;">🔤 <strong>spaCy</strong></div>
+                <div style="color: {'#00ff88' if SPACY_AVAILABLE else '#ff6666'};">{status}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col3:
-        st.info("🔧 **Patterns**: ✅ Always Available")
+        st.markdown(f"""
+        <div class="metric-container">
+            <div style="text-align: center;">
+                <div style="font-size: 1.2rem;">🔧 <strong>Patterns</strong></div>
+                <div style="color: #00ff88;">✅ Always Available</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Initialize extractor
     if 'extractor' not in st.session_state:
@@ -640,14 +918,35 @@ def main():
                     st.success(f"✅ Data extracted successfully!")
                     st.info(f"🎯 **Entities Found**: {len(extracted_data.entities)} total ({nlp_entities} from NLP models, {pattern_entities} from patterns)")
                     
-                    # Show quick preview
+                    # Show quick preview with better styling
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.metric("📝 Text Snippets", len(extracted_data.text_snippets))
+                        st.markdown(f"""
+                        <div class="metric-container">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; color: #00d4ff;">{len(extracted_data.text_snippets)}</div>
+                                <div>📝 Text Snippets</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                     with col2:
-                        st.metric("🔗 Links", len(extracted_data.links))
+                        st.markdown(f"""
+                        <div class="metric-container">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; color: #dd55ff;">{len(extracted_data.links)}</div>
+                                <div>🔗 Links</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                     with col3:
-                        st.metric("💡 Suggested Queries", len(extracted_data.suggested_queries))
+                        st.markdown(f"""
+                        <div class="metric-container">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; color: #ffaa00;">{len(extracted_data.suggested_queries)}</div>
+                                <div>💡 Suggested Queries</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                 except Exception as e:
                     st.error(f"❌ Extraction failed: {str(e)}")
@@ -668,13 +967,20 @@ def main():
             
             # Better display of original query
             if data.original_query and data.original_query != "Query not found":
-                st.success(f"**Found Query:** {data.original_query}")
-                
-                # Show query details
-                st.write("**Query Details:**")
-                st.write(f"• **Text**: `{data.original_query}`")
-                st.write(f"• **Length**: {len(data.original_query)} characters")
-                st.write(f"• **Word count**: {len(data.original_query.split())} words")
+                st.markdown(f"""
+                <div class="extraction-section">
+                    <div style="font-size: 1.2rem; margin-bottom: 1rem;">
+                        <strong style="color: #00ff88;">✅ Found Query:</strong>
+                    </div>
+                    <div style="font-size: 1.5rem; color: #00d4ff; margin-bottom: 1rem;">
+                        "{data.original_query}"
+                    </div>
+                    <div style="display: flex; gap: 2rem;">
+                        <div><strong>Length:</strong> {len(data.original_query)} characters</div>
+                        <div><strong>Words:</strong> {len(data.original_query.split())} words</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 st.error("❌ Original query not found in the raw data")
                 st.info("💡 **Possible reasons:**\n- Raw data might be incomplete\n- Different Gemini response format\n- Try using the sample data to test")
@@ -692,16 +998,18 @@ def main():
             
             st.subheader("💡 All Suggested Queries")
             if data.suggested_queries:
-                st.info(f"Found {len(data.suggested_queries)} suggested queries from Gemini:")
+                st.markdown(f"""
+                <div class="extraction-section">
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Found {len(data.suggested_queries)} suggested queries from Gemini:</strong>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
                 
-                # Display queries in a more readable format
+                # Display queries with styling
                 for i, query in enumerate(data.suggested_queries, 1):
-                    col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.write(f"**{i}.** {query}")
-                    with col2:
-                        query_type = "❓" if any(word in query.lower() for word in ['what', 'how', 'when', 'where', 'why', 'who', '?']) else "📰" if any(word in query.lower() for word in ['news', 'latest', 'breaking']) else "🔍"
-                        st.write(query_type)
+                    query_type = "❓" if any(word in query.lower() for word in ['what', 'how', 'when', 'where', 'why', 'who', '?']) else "📰" if any(word in query.lower() for word in ['news', 'latest', 'breaking']) else "🔍"
+                    display_query_with_styling(query, i, query_type)
                 
                 # Show categorized queries
                 question_queries = [q for q in data.suggested_queries if any(word in q.lower() for word in ['what', 'how', 'when', 'where', 'why', 'who', '?'])]
@@ -713,19 +1021,27 @@ def main():
                     
                     with col1:
                         if question_queries:
-                            st.write(f"❓ **Questions**: {len(question_queries)}")
-                            for q in question_queries[:3]:
-                                st.caption(f"• {q}")
-                            if len(question_queries) > 3:
-                                st.caption(f"... and {len(question_queries) - 3} more")
+                            st.markdown(f"""
+                            <div class="extraction-section">
+                                <strong>❓ Questions: {len(question_queries)}</strong>
+                                <ul style="margin-top: 0.5rem;">
+                                    {''.join([f'<li>{q}</li>' for q in question_queries[:3]])}
+                                    {f'<li><em>... and {len(question_queries) - 3} more</em></li>' if len(question_queries) > 3 else ''}
+                                </ul>
+                            </div>
+                            """, unsafe_allow_html=True)
                     
                     with col2:
                         if news_queries:
-                            st.write(f"📰 **News-related**: {len(news_queries)}")
-                            for q in news_queries[:3]:
-                                st.caption(f"• {q}")
-                            if len(news_queries) > 3:
-                                st.caption(f"... and {len(news_queries) - 3} more")
+                            st.markdown(f"""
+                            <div class="extraction-section">
+                                <strong>📰 News-related: {len(news_queries)}</strong>
+                                <ul style="margin-top: 0.5rem;">
+                                    {''.join([f'<li>{q}</li>' for q in news_queries[:3]])}
+                                    {f'<li><em>... and {len(news_queries) - 3} more</em></li>' if len(news_queries) > 3 else ''}
+                                </ul>
+                            </div>
+                            """, unsafe_allow_html=True)
                         
             else:
                 st.warning("No suggested queries found")
@@ -734,15 +1050,23 @@ def main():
         with tab2:
             st.subheader("💬 Text Snippets")
             if data.text_snippets:
-                st.info(f"Found {len(data.text_snippets)} text snippets from Gemini response:")
+                st.markdown(f"""
+                <div class="extraction-section">
+                    <strong>Found {len(data.text_snippets)} text snippets from Gemini response:</strong>
+                </div>
+                """, unsafe_allow_html=True)
                 
                 for i, snippet in enumerate(data.text_snippets, 1):
-                    with st.expander(f"Snippet {i} ({len(snippet)} characters)", expanded=i==1):
+                    with st.expander(f"📄 Snippet {i} ({len(snippet)} characters)", expanded=i==1):
                         st.markdown(f'<div class="snippet-preview">{snippet}</div>', unsafe_allow_html=True)
                         
                         # Show snippet stats
                         word_count = len(snippet.split())
-                        st.caption(f"📊 {len(snippet)} characters, {word_count} words")
+                        st.markdown(f"""
+                        <div style="margin-top: 1rem; color: #888;">
+                            📊 <strong>{len(snippet)}</strong> characters, <strong>{word_count}</strong> words
+                        </div>
+                        """, unsafe_allow_html=True)
             else:
                 st.warning("No text snippets found")
                 st.info("💡 The raw data might not contain substantial text content")
@@ -750,7 +1074,7 @@ def main():
         with tab3:
             st.subheader("🏷️ Extracted Entities with NLP")
             if data.entities:
-                # Show model breakdown
+                # Show model breakdown with better styling
                 model_breakdown = {}
                 for entity in data.entities:
                     model = entity['source']
@@ -762,16 +1086,47 @@ def main():
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     bert_count = len(model_breakdown.get('BERT', []))
-                    st.metric("🧠 BERT Entities", bert_count)
+                    st.markdown(f"""
+                    <div class="metric-container">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; color: #00d4ff;">{bert_count}</div>
+                            <div>🧠 BERT Entities</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
                 with col2:
                     spacy_count = len(model_breakdown.get('spaCy', []))
-                    st.metric("🔤 spaCy Entities", spacy_count)
+                    st.markdown(f"""
+                    <div class="metric-container">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; color: #00ff88;">{spacy_count}</div>
+                            <div>🔤 spaCy Entities</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
                 with col3:
                     pattern_count = len(model_breakdown.get('patterns', [])) + len(model_breakdown.get('basic_patterns', []))
-                    st.metric("🔧 Pattern Entities", pattern_count)
+                    st.markdown(f"""
+                    <div class="metric-container">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; color: #ffaa00;">{pattern_count}</div>
+                            <div>🔧 Pattern Entities</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
                 with col4:
                     avg_confidence = sum(e['confidence'] for e in data.entities) / len(data.entities)
-                    st.metric("🎯 Avg Confidence", f"{avg_confidence:.3f}")
+                    st.markdown(f"""
+                    <div class="metric-container">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; color: #dd55ff;">{avg_confidence:.3f}</div>
+                            <div>🎯 Avg Confidence</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
                 st.markdown("---")
                 
@@ -790,38 +1145,21 @@ def main():
                         entity_list.sort(key=lambda x: x['confidence'], reverse=True)
                         
                         for entity in entity_list:
-                            # Different styling based on source
-                            css_class = "nlp-entity" if entity['source'] in ['BERT', 'spaCy'] else "entity-item"
-                            
-                            confidence_color = "🟢" if entity['confidence'] > 0.9 else "🟡" if entity['confidence'] > 0.7 else "🟠"
-                            
-                            # Use columns instead of HTML to avoid styling issues
-                            col1, col2, col3 = st.columns([3, 1, 1])
-                            
-                            with col1:
-                                st.write(f"**{entity['text']}**")
-                                if entity.get('context'):
-                                    st.caption(f"💬 {entity['context'][:60]}...")
-                            
-                            with col2:
-                                st.write(f"{confidence_color} {entity['confidence']:.3f}")
-                            
-                            with col3:
-                                st.write(f"🤖 {entity['source']}")
-                            
-                            st.markdown("---")
+                            display_entity_with_styling(entity)
             else:
                 st.info("No entities found")
         
         with tab4:
             st.subheader("🔗 Extracted Links")
             if data.links:
+                st.markdown(f"""
+                <div class="extraction-section">
+                    <strong>Found {len(data.links)} links from Gemini response:</strong>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 for i, link in enumerate(data.links, 1):
-                    with st.expander(f"Link {i}: {link['source']}", expanded=False):
-                        st.write(f"**Title:** {link['title']}")
-                        st.write(f"**Source:** {link['source']}")
-                        st.write(f"**URL:** {link['url']}")
-                        st.markdown(f"[🔗 Open Link]({link['url']})")
+                    display_link_with_styling(link, i)
             else:
                 st.info("No links found")
         
@@ -840,10 +1178,10 @@ def main():
                     {
                         'text': e['text'],
                         'type': e['type'],
-                        'confidence': float(e['confidence']),  # Ensure float
+                        'confidence': float(e['confidence']),
                         'source': e['source'],
-                        'start': int(e.get('start', 0)),  # Ensure int
-                        'end': int(e.get('end', 0)),  # Ensure int
+                        'start': int(e.get('start', 0)),
+                        'end': int(e.get('end', 0)),
                         'context': e.get('context', '')
                     } for e in data.entities
                 ],
@@ -960,26 +1298,47 @@ Extraction Method: {'NLP-Enhanced' if use_nlp else 'Pattern-Only'}
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    st.write("**Model Performance:**")
+                    st.markdown("""
+                    <div class="extraction-section">
+                        <strong style="color: #00d4ff;">Model Performance:</strong>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
                     for model, stats in model_stats.items():
                         conf_emoji = "🟢" if stats['avg_conf'] > 0.9 else "🟡" if stats['avg_conf'] > 0.7 else "🟠"
-                        st.write(f"• **{model}**: {stats['count']} entities {conf_emoji} ({stats['avg_conf']:.3f} avg)")
+                        st.markdown(f"""
+                        <div class="entity-item">
+                            <strong>{model}:</strong> {stats['count']} entities {conf_emoji} ({stats['avg_conf']:.3f} avg)
+                        </div>
+                        """, unsafe_allow_html=True)
                 
                 with col2:
-                    st.write("**Entity Quality:**")
                     high_conf = len([e for e in data.entities if e['confidence'] > 0.9])
                     med_conf = len([e for e in data.entities if 0.7 < e['confidence'] <= 0.9])
                     low_conf = len([e for e in data.entities if e['confidence'] <= 0.7])
                     
-                    st.write(f"• **High confidence (>90%)**: {high_conf} entities 🟢")
-                    st.write(f"• **Medium confidence (70-90%)**: {med_conf} entities 🟡")
-                    st.write(f"• **Lower confidence (≤70%)**: {low_conf} entities 🟠")
+                    st.markdown(f"""
+                    <div class="extraction-section">
+                        <strong style="color: #00d4ff;">Entity Quality:</strong><br><br>
+                        <div class="confidence-high">• High confidence (>90%): {high_conf} entities 🟢</div>
+                        <div class="confidence-medium">• Medium confidence (70-90%): {med_conf} entities 🟡</div>
+                        <div class="confidence-low">• Lower confidence (≤70%): {low_conf} entities 🟠</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
                 # Show top entities by confidence
-                st.write("**🏆 Top Entities by Confidence:**")
+                st.markdown("**🏆 Top Entities by Confidence:**")
                 top_entities = sorted(data.entities, key=lambda x: x['confidence'], reverse=True)[:5]
+                
                 for i, entity in enumerate(top_entities, 1):
-                    st.write(f"{i}. **{entity['text']}** ({entity['type']}) - {entity['confidence']:.3f} via {entity['source']}")
+                    confidence_class = "confidence-high" if entity['confidence'] > 0.9 else "confidence-medium" if entity['confidence'] > 0.7 else "confidence-low"
+                    st.markdown(f"""
+                    <div class="entity-item">
+                        <strong>{i}. {entity['text']}</strong> 
+                        <span class="entity-badge">{entity['type']}</span>
+                        <span class="{confidence_class}"> - {entity['confidence']:.3f} via {entity['source']}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
