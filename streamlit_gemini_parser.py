@@ -345,36 +345,64 @@ class GeminiDataExtractor:
         return entities
     
     def _extract_original_query(self, raw_data: str) -> str:
-        """Extract the original search query"""
+        """Extract the original search query with multiple patterns"""
         patterns = [
-            r'\["([^"]+)"\],3,null,0',  # Main query pattern
-            r'\[\["([^"]+)"\]',         # Alternative pattern
-            r'"([^"]*latest news[^"]*)"'  # News-specific pattern
+            r'\[\["([^"]+)"\],3,null,0',     # Main query pattern
+            r'\[\["([^"]+)"\]',              # Alternative pattern
+            r'"([^"]*latest news[^"]*)"',    # News-specific pattern
+            r'null,\[\["([^"]+)"\],3',       # Another common pattern
+            r'\["([^"]+)",3,null,0',         # Variation without brackets
         ]
         
         for pattern in patterns:
             match = re.search(pattern, raw_data, re.IGNORECASE)
             if match:
-                return match.group(1).strip()
+                query = match.group(1).strip()
+                if len(query) > 2:  # Valid query
+                    return query
         
         return "Query not found"
     
     def _extract_suggested_queries(self, raw_data: str) -> List[str]:
-        """Extract suggested/related queries"""
+        """Extract ALL suggested/related queries from Gemini response"""
         suggested = []
         
-        # Pattern for suggested queries section
-        pattern = r'\[\["([^"]+)",\d+\]'
-        matches = re.findall(pattern, raw_data)
+        # Multiple patterns for different query formats in Gemini
+        patterns = [
+            r'\[\["([^"]+)",1\]',                    # Format: [["query",1]]
+            r'\[\["([^"]+)",2\]',                    # Format: [["query",2]]
+            r'\[\["([^"]+)",4\]',                    # Format: [["query",4]]
+            r'"([^"]*(?:what|how|when|where|why|who)[^"]*)"',  # Question patterns
+            r'"([^"]*(?:latest|breaking|news|today)[^"]*)"',   # News patterns
+            r'"([^"]*\?[^"]*)"',                     # Any question with ?
+            r'\["([^"]+)",[1-9]\]',                  # General pattern with numbers
+        ]
         
-        # Common suggested queries in Gemini responses
-        for match in matches:
-            if any(word in match.lower() for word in ['news', 'latest', 'today', 'what', 'how', 'when', 'where']):
-                if len(match) > 5 and match not in suggested:  # Avoid duplicates and too short queries
-                    suggested.append(match)
+        all_matches = set()  # Use set to avoid duplicates
         
-        # Limit to reasonable number
-        return suggested[:10]
+        for pattern in patterns:
+            matches = re.findall(pattern, raw_data, re.IGNORECASE)
+            for match in matches:
+                cleaned_match = match.strip()
+                # Filter valid queries
+                if (len(cleaned_match) > 5 and 
+                    not cleaned_match.startswith('http') and
+                    not cleaned_match.startswith('The latest news') and
+                    cleaned_match not in all_matches):
+                    all_matches.add(cleaned_match)
+        
+        # Convert to list and sort by relevance
+        suggested = list(all_matches)
+        
+        # Prioritize question-style queries
+        question_queries = [q for q in suggested if any(word in q.lower() for word in ['what', 'how', 'when', 'where', 'why', 'who', '?'])]
+        news_queries = [q for q in suggested if any(word in q.lower() for word in ['news', 'latest', 'breaking', 'today', 'headlines'])]
+        other_queries = [q for q in suggested if q not in question_queries and q not in news_queries]
+        
+        # Combine in priority order
+        final_queries = question_queries + news_queries + other_queries
+        
+        return final_queries[:15]  # Return more queries
     
     def _extract_text_snippets(self, raw_data: str) -> List[str]:
         """Extract main text content/snippets"""
