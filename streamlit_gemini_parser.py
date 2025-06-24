@@ -50,6 +50,7 @@ st.markdown("""
         border-radius: 0.5rem;
         margin: 1rem 0;
         border-left: 4px solid #28a745;
+        color: #212529;
     }
     .entity-item {
         background: #e3f2fd;
@@ -57,6 +58,7 @@ st.markdown("""
         margin: 0.2rem 0;
         border-radius: 0.3rem;
         border-left: 3px solid #1976d2;
+        color: #0d47a1;
     }
     .nlp-entity {
         background: #e8f5e8;
@@ -64,6 +66,34 @@ st.markdown("""
         margin: 0.2rem 0;
         border-radius: 0.3rem;
         border-left: 3px solid #4caf50;
+        color: #1b5e20;
+    }
+    .query-item {
+        background: #fff3e0;
+        padding: 0.5rem;
+        margin: 0.3rem 0;
+        border-radius: 0.3rem;
+        border-left: 3px solid #ff9800;
+        color: #e65100;
+    }
+    .snippet-preview {
+        background: #f5f5f5;
+        padding: 0.8rem;
+        border-radius: 0.3rem;
+        border: 1px solid #ddd;
+        color: #333;
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+    }
+    /* Fix Streamlit's default styling */
+    .stMarkdown {
+        color: inherit;
+    }
+    .stExpander {
+        background-color: white;
+    }
+    .stExpander > div > div {
+        color: #333;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -594,6 +624,9 @@ def main():
     
     # Process button
     if raw_input.strip():
+        # Store raw data for debugging
+        st.session_state.last_raw_data = raw_input
+        
         if st.button("🔍 Extract Data", type="primary", use_container_width=True):
             with st.spinner("Extracting data with NLP models..."):
                 try:
@@ -607,8 +640,18 @@ def main():
                     st.success(f"✅ Data extracted successfully!")
                     st.info(f"🎯 **Entities Found**: {len(extracted_data.entities)} total ({nlp_entities} from NLP models, {pattern_entities} from patterns)")
                     
+                    # Show quick preview
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("📝 Text Snippets", len(extracted_data.text_snippets))
+                    with col2:
+                        st.metric("🔗 Links", len(extracted_data.links))
+                    with col3:
+                        st.metric("💡 Suggested Queries", len(extracted_data.suggested_queries))
+                    
                 except Exception as e:
                     st.error(f"❌ Extraction failed: {str(e)}")
+                    st.info("💡 **Troubleshooting tips:**\n- Check if raw data is complete\n- Try the sample data first\n- Make sure data includes the full Gemini response")
     
     # Results section
     if hasattr(st.session_state, 'extracted_data'):
@@ -622,23 +665,87 @@ def main():
         
         with tab1:
             st.subheader("🔍 Original Query")
-            st.markdown(f'<div class="extraction-section"><h4>"{data.original_query}"</h4></div>', unsafe_allow_html=True)
             
-            st.subheader("💡 Suggested Queries")
-            if data.suggested_queries:
-                for i, query in enumerate(data.suggested_queries, 1):
-                    st.write(f"{i}. {query}")
+            # Better display of original query
+            if data.original_query and data.original_query != "Query not found":
+                st.success(f"**Found Query:** {data.original_query}")
+                
+                # Show query details
+                st.write("**Query Details:**")
+                st.write(f"• **Text**: `{data.original_query}`")
+                st.write(f"• **Length**: {len(data.original_query)} characters")
+                st.write(f"• **Word count**: {len(data.original_query.split())} words")
             else:
-                st.info("No suggested queries found")
+                st.error("❌ Original query not found in the raw data")
+                st.info("💡 **Possible reasons:**\n- Raw data might be incomplete\n- Different Gemini response format\n- Try using the sample data to test")
+                
+                # Debug info
+                with st.expander("🔧 Debug Information"):
+                    st.write("**Raw data preview (first 200 characters):**")
+                    if hasattr(st.session_state, 'last_raw_data'):
+                        preview = str(st.session_state.get('last_raw_data', ''))[:200]
+                        st.code(preview)
+                    else:
+                        st.write("No raw data available")
+            
+            st.markdown("---")
+            
+            st.subheader("💡 All Suggested Queries")
+            if data.suggested_queries:
+                st.info(f"Found {len(data.suggested_queries)} suggested queries from Gemini:")
+                
+                # Display queries in a more readable format
+                for i, query in enumerate(data.suggested_queries, 1):
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.write(f"**{i}.** {query}")
+                    with col2:
+                        query_type = "❓" if any(word in query.lower() for word in ['what', 'how', 'when', 'where', 'why', 'who', '?']) else "📰" if any(word in query.lower() for word in ['news', 'latest', 'breaking']) else "🔍"
+                        st.write(query_type)
+                
+                # Show categorized queries
+                question_queries = [q for q in data.suggested_queries if any(word in q.lower() for word in ['what', 'how', 'when', 'where', 'why', 'who', '?'])]
+                news_queries = [q for q in data.suggested_queries if any(word in q.lower() for word in ['news', 'latest', 'breaking', 'today', 'headlines'])]
+                
+                if question_queries or news_queries:
+                    st.markdown("**📊 Query Categories:**")
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        if question_queries:
+                            st.write(f"❓ **Questions**: {len(question_queries)}")
+                            for q in question_queries[:3]:
+                                st.caption(f"• {q}")
+                            if len(question_queries) > 3:
+                                st.caption(f"... and {len(question_queries) - 3} more")
+                    
+                    with col2:
+                        if news_queries:
+                            st.write(f"📰 **News-related**: {len(news_queries)}")
+                            for q in news_queries[:3]:
+                                st.caption(f"• {q}")
+                            if len(news_queries) > 3:
+                                st.caption(f"... and {len(news_queries) - 3} more")
+                        
+            else:
+                st.warning("No suggested queries found")
+                st.info("💡 **Troubleshooting:**\n- Raw data might not contain query suggestions\n- Different Gemini response format\n- Try the sample data to see expected format")
         
         with tab2:
             st.subheader("💬 Text Snippets")
             if data.text_snippets:
+                st.info(f"Found {len(data.text_snippets)} text snippets from Gemini response:")
+                
                 for i, snippet in enumerate(data.text_snippets, 1):
                     with st.expander(f"Snippet {i} ({len(snippet)} characters)", expanded=i==1):
-                        st.write(snippet)
+                        st.markdown(f'<div class="snippet-preview">{snippet}</div>', unsafe_allow_html=True)
+                        
+                        # Show snippet stats
+                        word_count = len(snippet.split())
+                        st.caption(f"📊 {len(snippet)} characters, {word_count} words")
             else:
-                st.info("No text snippets found")
+                st.warning("No text snippets found")
+                st.info("💡 The raw data might not contain substantial text content")
         
         with tab3:
             st.subheader("🏷️ Extracted Entities with NLP")
@@ -688,14 +795,21 @@ def main():
                             
                             confidence_color = "🟢" if entity['confidence'] > 0.9 else "🟡" if entity['confidence'] > 0.7 else "🟠"
                             
-                            st.markdown(f"""
-                            <div class="{css_class}">
-                                <strong>{entity['text']}</strong> 
-                                {confidence_color} {entity['confidence']:.3f} 
-                                <span style="color: #666;">({entity['source']})</span>
-                                {f"<br><small>💬 {entity.get('context', '')[:60]}...</small>" if entity.get('context') else ""}
-                            </div>
-                            """, unsafe_allow_html=True)
+                            # Use columns instead of HTML to avoid styling issues
+                            col1, col2, col3 = st.columns([3, 1, 1])
+                            
+                            with col1:
+                                st.write(f"**{entity['text']}**")
+                                if entity.get('context'):
+                                    st.caption(f"💬 {entity['context'][:60]}...")
+                            
+                            with col2:
+                                st.write(f"{confidence_color} {entity['confidence']:.3f}")
+                            
+                            with col3:
+                                st.write(f"🤖 {entity['source']}")
+                            
+                            st.markdown("---")
             else:
                 st.info("No entities found")
         
@@ -714,7 +828,7 @@ def main():
         with tab5:
             st.subheader("💾 Export Data")
             
-            # Create export data
+            # Create export data with JSON-serializable objects
             export_data = {
                 'extraction_timestamp': datetime.now().isoformat(),
                 'extraction_method': 'NLP-enhanced' if use_nlp else 'pattern-only',
@@ -722,8 +836,24 @@ def main():
                 'original_query': data.original_query,
                 'suggested_queries': data.suggested_queries,
                 'text_snippets': data.text_snippets,
-                'entities': data.entities,
-                'links': data.links,
+                'entities': [
+                    {
+                        'text': e['text'],
+                        'type': e['type'],
+                        'confidence': float(e['confidence']),  # Ensure float
+                        'source': e['source'],
+                        'start': int(e.get('start', 0)),  # Ensure int
+                        'end': int(e.get('end', 0)),  # Ensure int
+                        'context': e.get('context', '')
+                    } for e in data.entities
+                ],
+                'links': [
+                    {
+                        'url': link['url'],
+                        'title': link['title'],
+                        'source': link['source']
+                    } for link in data.links
+                ],
                 'summary': {
                     'total_snippets': len(data.text_snippets),
                     'total_entities': len(data.entities),
@@ -731,7 +861,7 @@ def main():
                     'entity_types': len(set(e['type'] for e in data.entities)),
                     'nlp_entities': len([e for e in data.entities if e['source'] in ['BERT', 'spaCy']]),
                     'pattern_entities': len([e for e in data.entities if e['source'] in ['patterns', 'basic_patterns']]),
-                    'avg_confidence': sum(e['confidence'] for e in data.entities) / len(data.entities) if data.entities else 0
+                    'avg_confidence': float(sum(e['confidence'] for e in data.entities) / len(data.entities)) if data.entities else 0.0
                 }
             }
             
