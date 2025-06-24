@@ -60,15 +60,6 @@ echo "Setup complete!"
 # GITHUB REPOSITORY STRUCTURE
 # ============================================================================
 
-your-repo/
-├── app.py                    # Main Streamlit application
-├── requirements.txt          # Python dependencies
-├── packages.txt             # System packages
-├── setup.sh                 # Optional setup script
-├── .streamlit/
-│   └── config.toml          # Streamlit configuration
-├── README.md                # Documentation
-└── .gitignore               # Git ignore file
 
 # ============================================================================
 # FILE: README.md
